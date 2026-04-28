@@ -85,7 +85,7 @@ class _MentorCardWidgetState extends State<MentorCardWidget> {
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             colors: [AppTheme.primaryPurple, AppTheme.primaryPurpleDark],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -101,7 +101,7 @@ class _MentorCardWidgetState extends State<MentorCardWidget> {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.auto_awesome, color: Colors.white, size: 16),
@@ -109,7 +109,7 @@ class _MentorCardWidgetState extends State<MentorCardWidget> {
                 const SizedBox(width: 10),
                 const Text('ARIA', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
                 const Spacer(),
-                Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.6), size: 18),
+                Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.6), size: 18),
               ],
             ),
             const SizedBox(height: 14),
@@ -132,7 +132,7 @@ class _MentorCardWidgetState extends State<MentorCardWidget> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
+                    color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text('Chat with ARIA', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500)),
@@ -149,8 +149,9 @@ class _MentorCardWidgetState extends State<MentorCardWidget> {
     height: 13,
     width: width,
     decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.2),
+      color: Colors.white.withValues(alpha: 0.2),
       borderRadius: BorderRadius.circular(6),
     ),
   );
 }
+

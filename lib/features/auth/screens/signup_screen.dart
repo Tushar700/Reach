@@ -21,6 +21,21 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _obscurePassword = true;
   String? _errorMessage;
 
+  String _friendlySignupError(Object error) {
+    final message = error.toString();
+    final lower = message.toLowerCase();
+
+    if (lower.contains('rate limit') || lower.contains('email rate limit exceeded')) {
+      return 'Too many signup emails were requested. Please wait a bit before trying again, or use an existing account.';
+    }
+
+    if (lower.contains('user already registered')) {
+      return 'That email is already registered. Try signing in instead.';
+    }
+
+    return message;
+  }
+
   Future<void> _signup() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() { _isLoading = true; _errorMessage = null; });
@@ -33,19 +48,21 @@ class _SignupScreenState extends State<SignupScreen> {
       );
 
       if (response.user != null) {
-        // Create profile record
-        await Supabase.instance.client.from('profiles').insert({
-          'id': response.user!.id,
-          'name': _nameController.text.trim(),
-          'email': _emailController.text.trim(),
-        });
-
-        if (mounted) context.go(AppRoutes.dashboard);
+        if (response.session != null) {
+          if (mounted) context.go(AppRoutes.dashboard);
+        } else if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Account created. Check your email to confirm your signup.'),
+            ),
+          );
+          context.go(AppRoutes.login);
+        }
       }
     } on AuthException catch (e) {
-      setState(() => _errorMessage = e.message);
+      setState(() => _errorMessage = _friendlySignupError(e.message));
     } catch (e) {
-      setState(() => _errorMessage = 'Something went wrong. Try again.');
+      setState(() => _errorMessage = _friendlySignupError(e));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -81,16 +98,16 @@ class _SignupScreenState extends State<SignupScreen> {
                   style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white),
                 ),
                 const SizedBox(height: 6),
-                Text('Start your journey with ARIA', style: TextStyle(fontSize: 15, color: Colors.white.withOpacity(0.5))),
+                Text('Start your journey with ARIA', style: TextStyle(fontSize: 15, color: Colors.white.withValues(alpha: 0.5))),
                 const SizedBox(height: 36),
 
                 if (_errorMessage != null) ...[
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE24B4A).withOpacity(0.1),
+                      color: const Color(0xFFE24B4A).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE24B4A).withOpacity(0.3)),
+                      border: Border.all(color: const Color(0xFFE24B4A).withValues(alpha: 0.3)),
                     ),
                     child: Text(_errorMessage!, style: const TextStyle(color: Color(0xFFE24B4A), fontSize: 13)),
                   ),
@@ -151,7 +168,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Already have an account? ', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14)),
+                    Text('Already have an account? ', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14)),
                     GestureDetector(
                       onTap: () => context.go(AppRoutes.login),
                       child: const Text('Sign in', style: TextStyle(color: AppTheme.primaryPurpleLight, fontWeight: FontWeight.w600, fontSize: 14)),
@@ -166,3 +183,4 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 }
+

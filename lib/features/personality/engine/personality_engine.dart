@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/utils/supabase_error_helper.dart';
 import '../models/personality_model.dart';
 
 final personalityProvider = FutureProvider<PersonalityProfile>((ref) async {
@@ -9,7 +10,13 @@ final personalityProvider = FutureProvider<PersonalityProfile>((ref) async {
 
 class PersonalityEngine {
   final _supabase = Supabase.instance.client;
-  String get _userId => _supabase.auth.currentUser!.id;
+  String get _userId {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('User must be signed in to load personality data.');
+    }
+    return userId;
+  }
 
   Future<PersonalityProfile> getOrCreate() async {
     try {
@@ -19,12 +26,15 @@ class PersonalityEngine {
           .eq('user_id', _userId)
           .single();
       return PersonalityProfile.fromJson(data);
-    } catch (_) {
+    } catch (e) {
       // Create default profile on first run
       final profile = PersonalityProfile(
         userId: _userId,
         updatedAt: DateTime.now(),
       );
+      if (friendlySupabaseError(e).contains('Supabase tables are missing')) {
+        return profile;
+      }
       await _supabase.from('personality_scores').insert({
         'user_id': _userId,
         ...profile.toJson(),

@@ -67,24 +67,51 @@ class PersonalityProfile {
     required int habitStreakAvg,
     required double avgMood,
   }) {
-    final taskRate = tasksTotal > 0 ? (tasksCompleted / tasksTotal) * 100 : 50;
-    final habitScore = (habitStreakAvg / 7) * 100; // normalise to weekly
+    final double taskRate =
+        tasksTotal > 0 ? (tasksCompleted / tasksTotal) * 100 : 50.0;
+    final double habitScore = (habitStreakAvg / 7) * 100; // normalise to weekly
+    final nextDisciplineScore = _lerp(disciplineScore, taskRate, 0.3);
+    final nextFocusScore = _lerp(
+      focusScore,
+      taskRate * 0.8 + habitScore * 0.2,
+      0.2,
+    );
+    final nextConsistencyScore = _lerp(consistencyScore, habitScore, 0.3);
+    final nextMotivationScore = _lerp(motivationScore, avgMood * 20, 0.25);
+    final nextEnergyScore = _lerp(energyScore, avgMood * 20, 0.2);
+
+    final nextMentorTone = _computeMentorTone(
+      disciplineScore: nextDisciplineScore,
+      focusScore: nextFocusScore,
+      energyScore: nextEnergyScore,
+    );
 
     return PersonalityProfile(
       userId: userId,
-      disciplineScore: _lerp(disciplineScore, taskRate, 0.3),
-      focusScore: _lerp(focusScore, taskRate * 0.8 + habitScore * 0.2, 0.2),
-      consistencyScore: _lerp(consistencyScore, habitScore, 0.3),
-      motivationScore: _lerp(motivationScore, avgMood * 20, 0.25),
-      energyScore: _lerp(energyScore, avgMood * 20, 0.2),
+      disciplineScore: nextDisciplineScore,
+      focusScore: nextFocusScore,
+      consistencyScore: nextConsistencyScore,
+      motivationScore: nextMotivationScore,
+      energyScore: nextEnergyScore,
       motivationType: motivationType,
       energyCycle: energyCycle,
-      mentorTone: computedMentorTone,
+      mentorTone: nextMentorTone,
       updatedAt: DateTime.now(),
     );
   }
 
+  String _computeMentorTone({
+    required double disciplineScore,
+    required double focusScore,
+    required double energyScore,
+  }) {
+    if (disciplineScore >= 70 && focusScore >= 70) return 'analytical';
+    if (disciplineScore < 40) return 'strict';
+    if (energyScore < 40) return 'calm';
+    return 'supportive';
+  }
+
   /// Weighted lerp for smooth score evolution
   double _lerp(double current, double target, double weight) =>
-      (current * (1 - weight) + target * weight).clamp(0, 100);
+      (current * (1 - weight) + target * weight).clamp(0.0, 100.0).toDouble();
 }

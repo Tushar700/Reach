@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/supabase_error_helper.dart';
 import '../models/task_model.dart';
 import '../services/tasks_service.dart';
 import '../../../core/theme/app_theme.dart';
@@ -40,7 +41,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'What do you need to do?',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
                   filled: true,
                   fillColor: AppTheme.darkBg,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -62,11 +63,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                       decoration: BoxDecoration(
-                        color: isSelected ? _priorityColor(p).withOpacity(0.2) : AppTheme.darkBg,
+                        color: isSelected ? _priorityColor(p).withValues(alpha: 0.2) : AppTheme.darkBg,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: isSelected ? _priorityColor(p) : Colors.transparent),
                       ),
-                      child: Text(p, style: TextStyle(color: isSelected ? _priorityColor(p) : Colors.white.withOpacity(0.5), fontSize: 13, fontWeight: FontWeight.w500)),
+                      child: Text(p, style: TextStyle(color: isSelected ? _priorityColor(p) : Colors.white.withValues(alpha: 0.5), fontSize: 13, fontWeight: FontWeight.w500)),
                     ),
                   );
                 }).toList(),
@@ -75,13 +76,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               ElevatedButton(
                 onPressed: () async {
                   if (_taskController.text.trim().isEmpty) return;
+                  final navigator = Navigator.of(context);
                   await ref.read(tasksServiceProvider).addTask(
                     _taskController.text.trim(),
                     priority: _selectedPriority,
                   );
                   _taskController.clear();
                   ref.invalidate(tasksProvider);
-                  if (mounted) Navigator.pop(context);
+                  if (!mounted) return;
+                  navigator.pop();
                 },
                 child: const Text('Add task'),
               ),
@@ -122,18 +125,27 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       ),
       body: tasksAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: Colors.white))),
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              friendlySupabaseError(e, feature: 'Tasks'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
         data: (tasks) {
           if (tasks.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle_outline, size: 60, color: Colors.white.withOpacity(0.2)),
+                  Icon(Icons.check_circle_outline, size: 60, color: Colors.white.withValues(alpha: 0.2)),
                   const SizedBox(height: 16),
-                  Text('No tasks yet', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 16)),
+                  Text('No tasks yet', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 16)),
                   const SizedBox(height: 8),
-                  Text('Tap + to add your first task', style: TextStyle(color: Colors.white.withOpacity(0.25), fontSize: 13)),
+                  Text('Tap + to add your first task', style: TextStyle(color: Colors.white.withValues(alpha: 0.25), fontSize: 13)),
                 ],
               ),
             );
@@ -159,6 +171,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'tasks_fab',
         onPressed: _showAddTaskSheet,
         backgroundColor: AppTheme.primaryPurple,
         child: const Icon(Icons.add, color: Colors.white),
@@ -171,12 +184,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       padding: const EdgeInsets.only(bottom: 8, top: 4),
       child: Row(
         children: [
-          Text(title, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+          Text(title, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
             decoration: BoxDecoration(color: AppTheme.darkCard, borderRadius: BorderRadius.circular(10)),
-            child: Text('$count', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11)),
+            child: Text('$count', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11)),
           ),
         ],
       ),
@@ -192,7 +205,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         padding: const EdgeInsets.only(right: 16),
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFFE24B4A).withOpacity(0.2),
+          color: const Color(0xFFE24B4A).withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(14),
         ),
         child: const Icon(Icons.delete_outline, color: Color(0xFFE24B4A)),
@@ -223,7 +236,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 color: task.isCompleted ? AppTheme.primaryPurple : Colors.transparent,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: task.isCompleted ? AppTheme.primaryPurple : Colors.white.withOpacity(0.3),
+                  color: task.isCompleted ? AppTheme.primaryPurple : Colors.white.withValues(alpha: 0.3),
                   width: 1.5,
                 ),
               ),
@@ -233,17 +246,17 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           title: Text(
             task.title,
             style: TextStyle(
-              color: task.isCompleted ? Colors.white.withOpacity(0.35) : Colors.white,
+              color: task.isCompleted ? Colors.white.withValues(alpha: 0.35) : Colors.white,
               fontSize: 14,
               fontWeight: FontWeight.w500,
               decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-              decorationColor: Colors.white.withOpacity(0.35),
+              decorationColor: Colors.white.withValues(alpha: 0.35),
             ),
           ),
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: _priorityColor(task.priority ?? 'medium').withOpacity(0.12),
+              color: _priorityColor(task.priority ?? 'medium').withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
@@ -256,3 +269,4 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 }
+

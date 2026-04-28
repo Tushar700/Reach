@@ -42,6 +42,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     final session = Supabase.instance.client.auth.currentSession;
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     final onboarded = prefs.getBool('onboarded') ?? false;
 
     if (session != null) {
@@ -79,7 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.primaryPurple.withOpacity(0.4),
+                        color: AppTheme.primaryPurple.withValues(alpha: 0.4),
                         blurRadius: 30,
                         spreadRadius: 5,
                       ),
@@ -101,7 +102,7 @@ class _SplashScreenState extends State<SplashScreen>
                 Text(
                   'Your personal life mentor',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 15,
                   ),
                 ),
@@ -113,3 +114,4 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
+

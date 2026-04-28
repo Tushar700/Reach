@@ -25,19 +25,27 @@ class _MoodBannerWidgetState extends State<MoodBannerWidget> {
   }
 
   Future<void> _check() async {
-    final userId = _supabase.auth.currentUser!.id;
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return;
     final today = DateTime.now();
     final start = DateTime(today.year, today.month, today.day).toIso8601String();
 
-    final data = await _supabase
-        .from('mood_logs')
-        .select()
-        .eq('user_id', userId)
-        .gte('created_at', start)
-        .limit(1);
+    try {
+      final data = await _supabase
+          .from('mood_logs')
+          .select()
+          .eq('user_id', userId)
+          .gte('created_at', start)
+          .limit(1);
 
-    if ((data as List).isNotEmpty) {
-      setState(() { _loggedToday = true; _todayMood = data[0]['mood_value']; });
+      if ((data as List).isNotEmpty) {
+        setState(() {
+          _loggedToday = true;
+          _todayMood = data[0]['mood_value'];
+        });
+      }
+    } catch (_) {
+      // Keep the dashboard usable even if the backend schema is incomplete.
     }
   }
 
@@ -48,19 +56,19 @@ class _MoodBannerWidgetState extends State<MoodBannerWidget> {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: Color(opt['color'] as int).withOpacity(0.1),
+          color: Color(opt['color'] as int).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Color(opt['color'] as int).withOpacity(0.25)),
+          border: Border.all(color: Color(opt['color'] as int).withValues(alpha: 0.25)),
         ),
         child: Row(
           children: [
             Text(opt['emoji'] as String, style: const TextStyle(fontSize: 20)),
             const SizedBox(width: 10),
-            Text('Feeling ${(opt['label'] as String).toLowerCase()} today', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13)),
+            Text('Feeling ${(opt['label'] as String).toLowerCase()} today', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13)),
             const Spacer(),
             GestureDetector(
               onTap: () => context.push(AppRoutes.mood),
-              child: Text('Details', style: TextStyle(color: AppTheme.primaryPurpleLight, fontSize: 12)),
+              child: const Text('Details', style: TextStyle(color: AppTheme.primaryPurpleLight, fontSize: 12)),
             ),
           ],
         ),
@@ -78,14 +86,15 @@ class _MoodBannerWidgetState extends State<MoodBannerWidget> {
         ),
         child: Row(
           children: [
-            Text('😐', style: const TextStyle(fontSize: 20)),
+            const Text('😐', style: TextStyle(fontSize: 20)),
             const SizedBox(width: 10),
-            Text('How are you feeling today?', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+            Text('How are you feeling today?', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
             const Spacer(),
-            Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.3), size: 18),
+            Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.3), size: 18),
           ],
         ),
       ),
     );
   }
 }
+

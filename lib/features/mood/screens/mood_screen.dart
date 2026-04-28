@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../models/mood_model.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/supabase_error_helper.dart';
 
 class MoodScreen extends StatefulWidget {
   const MoodScreen({super.key});
@@ -24,6 +25,7 @@ class _MoodScreenState extends State<MoodScreen> {
   bool _loading = true;
   bool _saving = false;
   bool _loggedToday = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -32,53 +34,81 @@ class _MoodScreenState extends State<MoodScreen> {
   }
 
   Future<void> _loadLogs() async {
-    final userId = _supabase.auth.currentUser!.id;
-    final data = await _supabase
-        .from('mood_logs')
-        .select()
-        .eq('user_id', userId)
-        .order('created_at', ascending: false)
-        .limit(14);
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      return;
+    }
+    try {
+      final data = await _supabase
+          .from('mood_logs')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false)
+          .limit(14);
 
-    final logs = (data as List).map((e) => MoodLog.fromJson(e)).toList();
-    final today = DateTime.now();
-    final todayLog = logs.any((l) =>
-        l.createdAt.year == today.year &&
-        l.createdAt.month == today.month &&
-        l.createdAt.day == today.day);
+      final logs = (data as List).map((e) => MoodLog.fromJson(e)).toList();
+      final today = DateTime.now();
+      final todayLog = logs.any((l) =>
+          l.createdAt.year == today.year &&
+          l.createdAt.month == today.month &&
+          l.createdAt.day == today.day);
 
-    setState(() {
-      _recentLogs = logs;
-      _loggedToday = todayLog;
-      _loading = false;
-    });
+      setState(() {
+        _recentLogs = logs;
+        _loggedToday = todayLog;
+        _loading = false;
+        _errorMessage = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _errorMessage = friendlySupabaseError(e, feature: 'Mood tracking');
+      });
+    }
   }
 
   Future<void> _saveMood() async {
     setState(() => _saving = true);
-    final userId = _supabase.auth.currentUser!.id;
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      setState(() => _saving = false);
+      return;
+    }
     final moodOption = AppConstants.moodOptions.firstWhere((m) => m['value'] == _selectedMood);
 
-    await _supabase.from('mood_logs').insert({
-      'id': _uuid.v4(),
-      'user_id': userId,
-      'mood_value': _selectedMood,
-      'mood_label': moodOption['label'],
-      'note': _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
-      'energy_level': _energyLevel,
-      'created_at': DateTime.now().toIso8601String(),
-    });
+    try {
+      await _supabase.from('mood_logs').insert({
+        'id': _uuid.v4(),
+        'user_id': userId,
+        'mood_value': _selectedMood,
+        'mood_label': moodOption['label'],
+        'note': _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+        'energy_level': _energyLevel,
+        'created_at': DateTime.now().toIso8601String(),
+      });
 
-    _noteController.clear();
-    _loadLogs();
-    setState(() => _saving = false);
+      _noteController.clear();
+      _loadLogs();
+      setState(() => _saving = false);
 
-    if (mounted) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Mood logged'),
+            backgroundColor: AppTheme.accentTeal,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _saving = false);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Mood logged'),
-          backgroundColor: AppTheme.accentTeal,
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(friendlySupabaseError(e, feature: 'Mood tracking')),
         ),
       );
     }
@@ -106,6 +136,17 @@ class _MoodScreenState extends State<MoodScreen> {
       appBar: AppBar(title: const Text('Mood & energy')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      _errorMessage!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                )
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -119,11 +160,11 @@ class _MoodScreenState extends State<MoodScreen> {
                     const SizedBox(height: 24),
                   ],
                   if (_recentLogs.isNotEmpty) ...[
-                    Text('Last 14 days', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                    Text('Last 14 days', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
                     const SizedBox(height: 12),
                     _buildMoodChart(),
                     const SizedBox(height: 24),
-                    Text('Recent logs', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+                    Text('Recent logs', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
                     const SizedBox(height: 10),
                     ..._recentLogs.take(7).map((log) => _buildLogTile(log)),
                   ],
@@ -137,9 +178,9 @@ class _MoodScreenState extends State<MoodScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.accentTeal.withOpacity(0.1),
+        color: AppTheme.accentTeal.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.accentTeal.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.accentTeal.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -148,7 +189,7 @@ class _MoodScreenState extends State<MoodScreen> {
           Expanded(
             child: Text(
               'You already logged your mood today. Come back tomorrow!',
-              style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13),
             ),
           ),
         ],
@@ -181,7 +222,7 @@ class _MoodScreenState extends State<MoodScreen> {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: isSelected ? Color(opt['color'] as int).withOpacity(0.2) : Colors.transparent,
+                    color: isSelected ? Color(opt['color'] as int).withValues(alpha: 0.2) : Colors.transparent,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected ? Color(opt['color'] as int) : Colors.transparent,
@@ -203,20 +244,20 @@ class _MoodScreenState extends State<MoodScreen> {
           ),
 
           const SizedBox(height: 20),
-          Text('Energy level', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+          Text('Energy level', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
           const SizedBox(height: 8),
 
           // Energy slider
           Row(
             children: [
-              Text('Low', style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 11)),
+              Text('Low', style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 11)),
               Expanded(
                 child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     activeTrackColor: AppTheme.primaryPurple,
                     inactiveTrackColor: AppTheme.darkBorder,
                     thumbColor: AppTheme.primaryPurple,
-                    overlayColor: AppTheme.primaryPurple.withOpacity(0.1),
+                    overlayColor: AppTheme.primaryPurple.withValues(alpha: 0.1),
                     trackHeight: 4,
                   ),
                   child: Slider(
@@ -228,7 +269,7 @@ class _MoodScreenState extends State<MoodScreen> {
                   ),
                 ),
               ),
-              Text('High', style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 11)),
+              Text('High', style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 11)),
             ],
           ),
 
@@ -239,7 +280,7 @@ class _MoodScreenState extends State<MoodScreen> {
             maxLines: 2,
             decoration: InputDecoration(
               hintText: 'Add a note (optional)...',
-              hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 13),
+              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 13),
               filled: true,
               fillColor: AppTheme.darkBg,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -280,14 +321,14 @@ class _MoodScreenState extends State<MoodScreen> {
                 width: 28,
                 height: height,
                 decoration: BoxDecoration(
-                  color: _moodColor(log.moodValue).withOpacity(0.7),
+                  color: _moodColor(log.moodValue).withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 _dayLabel(log.createdAt),
-                style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 10),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 10),
               ),
             ],
           );
@@ -320,16 +361,17 @@ class _MoodScreenState extends State<MoodScreen> {
               children: [
                 Text(log.moodLabel, style: TextStyle(color: _moodColor(log.moodValue), fontWeight: FontWeight.w500, fontSize: 13)),
                 if (log.note != null)
-                  Text(log.note!, style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
+                  Text(log.note!, style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 12)),
               ],
             ),
           ),
           Text(
             '${log.createdAt.day}/${log.createdAt.month}',
-            style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 12),
           ),
         ],
       ),
     );
   }
 }
+

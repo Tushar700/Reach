@@ -14,7 +14,13 @@ class TasksService {
   final _supabase = Supabase.instance.client;
   final _uuid = const Uuid();
 
-  String get _userId => _supabase.auth.currentUser!.id;
+  String get _userId {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('User must be signed in to manage tasks.');
+    }
+    return userId;
+  }
 
   Future<List<Task>> getTasks() async {
     final data = await _supabase

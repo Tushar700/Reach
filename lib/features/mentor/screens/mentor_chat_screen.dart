@@ -68,8 +68,8 @@ class _MentorChatScreenState extends ConsumerState<MentorChatScreen> {
             Container(
               width: 34,
               height: 34,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
                   colors: [AppTheme.primaryPurple, AppTheme.accentTeal],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -90,14 +90,14 @@ class _MentorChatScreenState extends ConsumerState<MentorChatScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: Colors.white.withOpacity(0.4), size: 20),
+            icon: Icon(Icons.refresh, color: Colors.white.withValues(alpha: 0.4), size: 20),
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (_) => AlertDialog(
                   backgroundColor: AppTheme.darkCard,
                   title: const Text('Clear conversation', style: TextStyle(color: Colors.white, fontSize: 16)),
-                  content: Text('This will delete all messages.', style: TextStyle(color: Colors.white.withOpacity(0.6))),
+                  content: Text('This will delete all messages.', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))),
                   actions: [
                     TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
                     TextButton(
@@ -146,7 +146,7 @@ class _MentorChatScreenState extends ConsumerState<MentorChatScreen> {
             width: 70,
             height: 70,
             decoration: BoxDecoration(
-              color: AppTheme.primaryPurple.withOpacity(0.12),
+              color: AppTheme.primaryPurple.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.auto_awesome, color: AppTheme.primaryPurpleLight, size: 32),
@@ -159,7 +159,7 @@ class _MentorChatScreenState extends ConsumerState<MentorChatScreen> {
             child: Text(
               'I\'m here to help you build better habits, stay focused, and reach your goals. What\'s on your mind?',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14, height: 1.6),
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14, height: 1.6),
             ),
           ),
           const SizedBox(height: 24),
@@ -181,7 +181,7 @@ class _MentorChatScreenState extends ConsumerState<MentorChatScreen> {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppTheme.darkBorder),
               ),
-              child: Text(prompt, style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13)),
+              child: Text(prompt, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13)),
             ),
           )),
         ],
@@ -210,7 +210,7 @@ class _MentorChatScreenState extends ConsumerState<MentorChatScreen> {
         child: Text(
           message.content,
           style: TextStyle(
-            color: isUser ? Colors.white : Colors.white.withOpacity(0.9),
+            color: isUser ? Colors.white : Colors.white.withValues(alpha: 0.9),
             fontSize: 14,
             height: 1.5,
           ),
@@ -244,9 +244,11 @@ class _MentorChatScreenState extends ConsumerState<MentorChatScreen> {
   Widget _buildInputBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppTheme.darkSurface,
-        border: Border(top: BorderSide(color: AppTheme.darkBorder, width: 0.5)),
+        border: Border(
+          top: BorderSide(color: AppTheme.darkBorder, width: 0.5),
+        ),
       ),
       child: Row(
         children: [
@@ -260,7 +262,7 @@ class _MentorChatScreenState extends ConsumerState<MentorChatScreen> {
               onSubmitted: (_) => _sendMessage(),
               decoration: InputDecoration(
                 hintText: 'Talk to ARIA...',
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 14),
+                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 14),
                 filled: true,
                 fillColor: AppTheme.darkCard,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
@@ -323,10 +325,11 @@ class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
         width: 7, height: 7,
         margin: const EdgeInsets.symmetric(horizontal: 3),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(_a.value),
+          color: Colors.white.withValues(alpha: _a.value),
           shape: BoxShape.circle,
         ),
       ),
     );
   }
 }
+

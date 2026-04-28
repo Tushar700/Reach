@@ -19,12 +19,12 @@ class StatsWidget extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Text('Your scores', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
+              Text('Your scores', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 0.5)),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryPurple.withOpacity(0.15),
+                  color: AppTheme.primaryPurple.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -52,9 +52,9 @@ class StatsWidget extends ConsumerWidget {
               _ScoreCard(label: 'Energy', score: profile.energyScore, color: const Color(0xFF7F77DD)),
               const SizedBox(width: 8),
               // Mentor tone chip
-              Expanded(
-                child: Container(
-                  height: 72,
+                Expanded(
+                  child: Container(
+                    height: 76,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: AppTheme.darkCard,
@@ -65,7 +65,7 @@ class StatsWidget extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('ARIA tone', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10)),
+                      Text('ARIA tone', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10)),
                       Text(
                         profile.computedMentorTone,
                         style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
@@ -93,7 +93,7 @@ class _ScoreCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        height: 72,
+        height: 76,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: AppTheme.darkCard,
@@ -104,7 +104,7 @@ class _ScoreCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10)),
+            Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10)),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -114,7 +114,7 @@ class _ScoreCard extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 3),
-                  child: Text('/100', style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 10)),
+                  child: Text('/100', style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 10)),
                 ),
               ],
             ),
@@ -122,7 +122,7 @@ class _ScoreCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
                 value: score / 100,
-                backgroundColor: color.withOpacity(0.15),
+                backgroundColor: color.withValues(alpha: 0.15),
                 valueColor: AlwaysStoppedAnimation<Color>(color),
                 minHeight: 3,
               ),
@@ -133,3 +133,4 @@ class _ScoreCard extends StatelessWidget {
     );
   }
 }
+

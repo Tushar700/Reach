@@ -15,12 +15,49 @@ class AppTheme {
   static const Color darkBg = Color(0xFF0F0E1A);
   static const Color darkSurface = Color(0xFF1A1828);
   static const Color darkCard = Color(0xFF221F35);
+  static const Color darkCardElevated = Color(0xFF2A2740);
   static const Color darkBorder = Color(0xFF2E2B45);
+  static const Color darkBorderLight = Color(0xFF3D3A5C);
 
   // Light theme surfaces
   static const Color lightBg = Color(0xFFF5F4FF);
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightCard = Color(0xFFFAF9FF);
+  static const Color accentBlue = Color(0xFF378ADD);
+
+  static const List<Color> accentPulseColors = [
+    primaryPurple,
+    Color(0xFF7F77DD),
+    accentTeal,
+    Color(0xFF5DCAA5),
+    accentAmber,
+    Color(0xFFEF9F27),
+    primaryPurple,
+  ];
+
+  static const LinearGradient purpleGradient = LinearGradient(
+    colors: [primaryPurple, primaryPurpleLight],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient coralGradient = LinearGradient(
+    colors: [accentCoral, Color(0xFFE8865A)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient tealGradient = LinearGradient(
+    colors: [accentTeal, Color(0xFF5DCAA5)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient amberGradient = LinearGradient(
+    colors: [accentAmber, Color(0xFFEF9F27)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   static ThemeData get darkTheme {
     return ThemeData(
@@ -31,12 +68,10 @@ class AppTheme {
         secondary: accentTeal,
         tertiary: accentAmber,
         surface: darkSurface,
-        background: darkBg,
         error: Color(0xFFE24B4A),
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: Colors.white,
-        onBackground: Colors.white,
       ),
       scaffoldBackgroundColor: darkBg,
       cardColor: darkCard,
@@ -87,7 +122,7 @@ class AppTheme {
           elevation: 0,
         ),
       ),
-      cardTheme: CardTheme(
+     cardTheme: CardThemeData(
         color: darkCard,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -108,7 +143,6 @@ class AppTheme {
         secondary: accentTeal,
         tertiary: accentAmber,
         surface: lightSurface,
-        background: lightBg,
         onPrimary: Colors.white,
       ),
       scaffoldBackgroundColor: lightBg,
@@ -130,6 +164,7 @@ class AppTheme {
       ),
     );
   }
+  
 }
 
 // Reusable style helpers
@@ -145,6 +180,17 @@ class AppStyles {
 
   static TextStyle caption(BuildContext context) =>
       Theme.of(context).textTheme.bodySmall!.copyWith(
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
       );
+}
+
+BoxDecoration glassCard({double radius = 16}) {
+  return BoxDecoration(
+    color: Colors.white.withValues(alpha: 0.05),
+    borderRadius: BorderRadius.circular(radius),
+    border: Border.all(
+      color: Colors.white.withValues(alpha: 0.08),
+      width: 0.5,
+    ),
+  );
 }

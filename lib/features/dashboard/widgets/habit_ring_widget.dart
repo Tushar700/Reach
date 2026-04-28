@@ -23,22 +23,36 @@ class _HabitRingWidgetState extends State<HabitRingWidget> {
   }
 
   Future<void> _load() async {
-    final userId = _supabase.auth.currentUser!.id;
-    final data = await _supabase.from('habits').select().eq('user_id', userId);
-    final habits = data as List;
-    final today = DateTime.now();
-
-    int completed = 0;
-    for (final h in habits) {
-      final dates = (h['completed_dates'] as List? ?? []);
-      final doneToday = dates.any((d) {
-        final dt = DateTime.parse(d.toString());
-        return dt.year == today.year && dt.month == today.month && dt.day == today.day;
-      });
-      if (doneToday) completed++;
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      return;
     }
+    try {
+      final data = await _supabase.from('habits').select().eq('user_id', userId);
+      final habits = data as List;
+      final today = DateTime.now();
 
-    setState(() { _total = habits.length; _completedToday = completed; _loading = false; });
+      int completed = 0;
+      for (final h in habits) {
+        final dates = (h['completed_dates'] as List? ?? []);
+        final doneToday = dates.any((d) {
+          final dt = DateTime.parse(d.toString());
+          return dt.year == today.year && dt.month == today.month && dt.day == today.day;
+        });
+        if (doneToday) completed++;
+      }
+
+      setState(() {
+        _total = habits.length;
+        _completedToday = completed;
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+    }
   }
 
   @override
@@ -86,7 +100,7 @@ class _HabitRingWidgetState extends State<HabitRingWidget> {
                   _completedToday == _total
                       ? 'All done! Great consistency.'
                       : '${_total - _completedToday} habit${_total - _completedToday == 1 ? '' : 's'} remaining',
-                  style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12),
                 ),
               ],
             ),
@@ -98,3 +112,4 @@ class _HabitRingWidgetState extends State<HabitRingWidget> {
     );
   }
 }
+

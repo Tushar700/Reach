@@ -12,8 +12,11 @@ import '../../features/mentor/screens/mentor_chat_screen.dart';
 import '../../features/tasks/screens/tasks_screen.dart';
 import '../../features/habits/screens/habits_screen.dart';
 import '../../features/mood/screens/mood_screen.dart';
+import '../../features/analytics/screens/analytics_screen.dart';
+import '../../features/calendar/screens/calendar_screen.dart';
+import '../../features/profile/screens/profile_screen.dart';
+import '../../features/focus/screens/focus_screen.dart';
 
-// Route names
 class AppRoutes {
   static const splash = '/';
   static const onboarding = '/onboarding';
@@ -24,6 +27,10 @@ class AppRoutes {
   static const tasks = '/tasks';
   static const habits = '/habits';
   static const mood = '/mood';
+  static const analytics = '/analytics';
+  static const calendar = '/calendar';
+  static const profile = '/profile';
+  static const focus = '/focus';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -32,51 +39,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final session = Supabase.instance.client.auth.currentSession;
       final isAuth = session != null;
-      final isOnAuthPage = state.matchedLocation == AppRoutes.login ||
-          state.matchedLocation == AppRoutes.signup ||
-          state.matchedLocation == AppRoutes.splash ||
-          state.matchedLocation == AppRoutes.onboarding;
-
+      final isOnAuthPage = [
+        AppRoutes.login, AppRoutes.signup,
+        AppRoutes.splash, AppRoutes.onboarding,
+      ].contains(state.matchedLocation);
       if (!isAuth && !isOnAuthPage) return AppRoutes.login;
       return null;
     },
     routes: [
-      GoRoute(
-        path: AppRoutes.splash,
-        builder: (context, state) => const SplashScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.onboarding,
-        builder: (context, state) => const OnboardingScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.login,
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.signup,
-        builder: (context, state) => const SignupScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.dashboard,
-        builder: (context, state) => const DashboardScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.mentor,
-        builder: (context, state) => const MentorChatScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.tasks,
-        builder: (context, state) => const TasksScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.habits,
-        builder: (context, state) => const HabitsScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.mood,
-        builder: (context, state) => const MoodScreen(),
-      ),
+      GoRoute(path: AppRoutes.splash, builder: (_, __) => const SplashScreen()),
+      GoRoute(path: AppRoutes.onboarding, builder: (_, __) => const OnboardingScreen()),
+      GoRoute(path: AppRoutes.login, builder: (_, __) => const LoginScreen()),
+      GoRoute(path: AppRoutes.signup, builder: (_, __) => const SignupScreen()),
+      GoRoute(path: AppRoutes.dashboard, builder: (_, __) => const DashboardScreen()),
+      GoRoute(path: AppRoutes.mentor, builder: (_, __) => const MentorChatScreen()),
+      GoRoute(path: AppRoutes.tasks, builder: (_, __) => const TasksScreen()),
+      GoRoute(path: AppRoutes.habits, builder: (_, __) => const HabitsScreen()),
+      GoRoute(path: AppRoutes.mood, builder: (_, __) => const MoodScreen()),
+      GoRoute(path: AppRoutes.analytics, builder: (_, __) => const AnalyticsScreen()),
+      GoRoute(path: AppRoutes.calendar, builder: (_, __) => const CalendarScreen()),
+      GoRoute(path: AppRoutes.profile, builder: (_, __) => const ProfileScreen()),
+      GoRoute(path: AppRoutes.focus, builder: (_, __) => const FocusScreen()),
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(child: Text('Page not found: ${state.error}')),

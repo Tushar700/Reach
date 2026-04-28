@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 6),
                 Text(
                   'Sign in to continue your journey',
-                  style: TextStyle(fontSize: 15, color: Colors.white.withOpacity(0.5)),
+                  style: TextStyle(fontSize: 15, color: Colors.white.withValues(alpha: 0.5)),
                 ),
                 const SizedBox(height: 40),
 
@@ -84,9 +84,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE24B4A).withOpacity(0.1),
+                      color: const Color(0xFFE24B4A).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE24B4A).withOpacity(0.3)),
+                      border: Border.all(color: const Color(0xFFE24B4A).withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
@@ -148,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Don't have an account? ", style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14)),
+                    Text("Don't have an account? ", style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14)),
                     GestureDetector(
                       onTap: () => context.go(AppRoutes.signup),
                       child: const Text('Sign up', style: TextStyle(color: AppTheme.primaryPurpleLight, fontWeight: FontWeight.w600, fontSize: 14)),
@@ -163,3 +163,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

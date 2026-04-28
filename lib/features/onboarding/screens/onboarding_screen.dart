@@ -16,7 +16,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _pageController = PageController();
   int _currentPage = 0;
 
-  final _pages = [
+  final _pages = const [
     _OnboardingPage(
       icon: Icons.auto_awesome,
       title: 'Meet ARIA',
@@ -59,7 +59,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               alignment: Alignment.topRight,
               child: TextButton(
                 onPressed: _finish,
-                child: Text('Skip', style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14)),
+                child: Text('Skip', style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 14)),
               ),
             ),
             Expanded(
@@ -83,7 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       width: _currentPage == i ? 24 : 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: _currentPage == i ? AppTheme.primaryPurple : Colors.white.withOpacity(0.2),
+                        color: _currentPage == i ? AppTheme.primaryPurple : Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     )),
@@ -118,7 +118,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: page.color.withOpacity(0.15),
+              color: page.color.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(page.icon, color: page.color, size: 48),
@@ -129,7 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Text(
             page.subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.white.withOpacity(0.6), height: 1.6),
+            style: TextStyle(fontSize: 16, color: Colors.white.withValues(alpha: 0.6), height: 1.6),
           ),
         ],
       ),
@@ -144,3 +144,4 @@ class _OnboardingPage {
   final Color color;
   const _OnboardingPage({required this.icon, required this.title, required this.subtitle, required this.color});
 }
+
